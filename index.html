@@ -1,103 +1,399 @@
 <!DOCTYPE html>
-<p class="muted">Enter your birth date and set a target lifespan. The ring shows what percent of your life you’ve lived and what’s still ahead, based on today’s date. Data stays on your device (localStorage).</p>
-<div class="grid cols-2" style="margin-top:12px">
-<div>
-<label for="dob">Birth date</label>
-<input type="date" id="dob" />
-</div>
-<div>
-<label for="expectancy">Target lifespan (years)</label>
-<input type="number" id="expectancy" value="90" min="50" max="130" />
-</div>
-</div>
-<div style="margin-top:12px;display:flex;gap:10px">
-<button class="btn" id="saveProfile">Save</button>
-<button class="btn ghost" id="resetProfile">Reset</button>
-</div>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Eterna – Your Journey to Longevity</title>
+  <style>
+    :root{
+      --bg:#0c2a54;          /* deep ocean */
+      --bg2:#0f376f;         /* lighter ocean */
+      --card:#123a73;        /* card base */
+      --muted:#95b4e6;       /* muted text */
+      --text:#eaf1ff;        /* primary text */
+      --accent:#5bb3ff;      /* buttons/links */
+      --pill:#183f7e;        /* pill backgrounds */
+      --success:#28d87a;
+      --warn:#ffd166;
+      --radius:18px;
+      --shadow:0 10px 25px rgba(0,0,0,.25);
+    }
 
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0; font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Cantarell,"Helvetica Neue",Arial;
+      color:var(--text); background:linear-gradient(180deg,var(--bg),var(--bg2) 50%, var(--bg));
+      background-attachment:fixed;
+    }
 
-<div class="grid cols-2" style="margin-top:18px">
-<div class="card">
-<h3>Learn</h3>
-<p class="muted">Short lessons on aging science, animals that live long, and healthy habits.</p>
-<a class="btn" href="#learn">Go to Learn</a>
-</div>
-<div class="card">
-<h3>Track</h3>
-<p class="muted">Adjust your daily habits (sleep, food, exercise, stress) and see the score change.</p>
-<a class="btn" href="#track">Go to Track</a>
-</div>
-</div>
-<div class="grid cols-2" style="margin-top:16px">
-<div class="card">
-<h3>Reflect</h3>
-<p class="muted">Write about what a long, meaningful life means to you. Save entries privately.</p>
-<a class="btn" href="#reflect">Go to Reflect</a>
-</div>
-<div class="card">
-<h3>Community</h3>
-<p class="muted">See prompts and ideas from others thinking about longevity with care.</p>
-<a class="btn" href="#community">Open Community</a>
-</div>
-</div>
-</div>
-</div>
-</section>
+    /* Top Nav */
+    header{
+      position:sticky; top:0; z-index:20;
+      backdrop-filter:saturate(120%) blur(6px);
+      background:linear-gradient(180deg, rgba(9,24,53,.9), rgba(9,24,53,.6));
+      border-bottom:1px solid rgba(255,255,255,.06);
+    }
+    .nav{display:flex;align-items:center;gap:14px;max-width:1100px;margin:auto;padding:14px 18px}
+    .brand{font-weight:800;letter-spacing:.5px}
+    .brand span{opacity:.8;font-weight:600;font-size:.9rem}
+    nav a{color:var(--text);text-decoration:none;padding:10px 12px;border-radius:10px;opacity:.9}
+    nav a:hover{background:rgba(255,255,255,.06);opacity:1}
+    .spacer{flex:1}
+    .pill{background:var(--pill);padding:6px 10px;border-radius:100px;color:var(--muted);font-size:.85rem}
 
+    main{max-width:1100px;margin:32px auto;padding:0 18px 100px}
 
-<!-- LEARN -->
-<section id="learn" class="card" style="margin-top:18px">
-<div class="sectionTitle"><h2>Learn</h2><span class="pill">Explore longevity science</span></div>
-<div class="grid cols-3">
-<div class="tile"><div class="thumb"></div><div class="pad"><strong>The Science of Blue Zones</strong><p class="muted">What places with many 100+ year-olds do differently.</p></div></div>
-<div class="tile"><div class="thumb"></div><div class="pad"><strong>Cellular Senescence</strong><p class="muted">How “zombie cells” speed up aging — and how to clear them.</p></div></div>
-<div class="tile"><div class="thumb"></div><div class="pad"><strong>Mediterranean Diet</strong><p class="muted">Simple nutrition patterns linked to longer healthspan.</p></div></div>
-<div class="tile"><div class="thumb"></div><div class="pad"><strong>Movement Medicine</strong><p class="muted">Why 150 minutes of moderate exercise/week matters.</p></div></div>
-<div class="tile"><div class="thumb"></div><div class="pad"><strong>Sleep Quality</strong><p class="muted">Sleep’s role in repair, memory, and longevity.</p></div></div>
-<div class="tile"><div class="thumb"></div><div class="pad"><strong>Social Connection</strong><p class="muted">A powerful (and often ignored) longevity factor.</p></div></div>
-</div>
+    /* Cards & layout */
+    .grid{display:grid;gap:16px}
+    .grid.cols-2{grid-template-columns:repeat(2,minmax(0,1fr))}
+    .grid.cols-3{grid-template-columns:repeat(3,minmax(0,1fr))}
+    @media (max-width:900px){
+      .grid.cols-2,.grid.cols-3{grid-template-columns:1fr}
+    }
+    .card{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.06);border-radius:var(--radius);
+      box-shadow:var(--shadow); padding:18px}
+    .card h3{margin:0 0 6px}
+    .muted{color:var(--muted)}
 
+    /* Hero ring */
+    .hero{display:grid;grid-template-columns:360px 1fr;gap:24px;align-items:center;margin:18px 0 28px}
+    @media (max-width:900px){.hero{grid-template-columns:1fr}}
+    .ringWrap{display:grid;place-items:center}
+    .ring{
+      --pct: 60; /* default percent */
+      width: 260px; height:260px; border-radius:50%;
+      background:
+        radial-gradient(circle at 50% 50%, rgba(12,42,84,1) 54%, transparent 55%),
+        conic-gradient(var(--accent) calc(var(--pct)*1%), rgba(255,255,255,.08) 0);
+      display:grid;place-items:center; position:relative;
+      box-shadow: 0 0 0 10px rgba(255,255,255,.02) inset, var(--shadow);
+    }
+    .ring .label{ text-align:center }
+    .ring .big{font-size:48px;font-weight:800}
+    .ring small{color:var(--muted)}
+    .hero h1{margin:0 0 6px;font-size:32px}
 
-<div class="sectionTitle" style="margin-top:22px"><h2>Latest Research</h2></div>
-<div class="grid cols-2">
-<div class="card"><div class="muted">November 2025</div><h3>Cellular Reprogramming Shows Promise for Age Reversal</h3><p class="muted">Scientists reversed aging markers in human cells using careful reprogramming.</p><div class="pill" style="display:inline-block;margin-top:6px">Why this matters: may restore youthful function without raising cancer risk.</div></div>
-<div class="card"><div class="muted">October 2025</div><h3>Mediterranean Diet Linked to 20% Lower Mortality</h3><p class="muted">Long-term study highlights olive oil, nuts, and fish as helpful staples.</p><div class="pill" style="display:inline-block;margin-top:6px">Why this matters: clear dietary guidance for long healthspan.</div></div>
-<div class="card"><div class="muted">September 2025</div><h3>NAD+ Precursor Shows Cognitive Benefits</h3><p class="muted">Randomized trial reports improved memory and clarity in adults over 60.</p><div class="pill" style="display:inline-block;margin-top:6px">Why this matters: first human evidence for brain health effect.</div></div>
-<div class="card"><div class="muted">August 2025</div><h3>Exercise Intensity and Longevity</h3><p class="muted">About 150 minutes/week of moderate activity maximizes lifespan benefits.</p><div class="pill" style="display:inline-block;margin-top:6px">Why this matters: clearer exercise recommendations.</div></div>
-</div>
+    /* Inputs */
+    label{display:block;margin-bottom:6px;color:var(--muted)}
+    input, select, textarea{
+      width:100%;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);
+      color:var(--text); border-radius:12px; padding:12px 14px; outline:none;
+    }
+    input:focus,textarea:focus{border-color:var(--accent)}
 
+    .btn{cursor:pointer;background:var(--accent);color:#092044;border:none;border-radius:12px;padding:10px 14px;font-weight:700}
+    .btn.ghost{background:transparent;color:var(--text);border:1px solid rgba(255,255,255,.2)}
 
-<div class="sectionTitle" style="margin-top:22px"><h2>Nature’s Longevity Champions</h2></div>
-<div class="grid cols-3">
-<div class="card"><strong>Naked Mole Rat</strong><p class="muted">30+ years • shows little aging and cancer resistance.</p></div>
-<div class="card"><strong>Greenland Shark</strong><p class="muted">400+ years • longest-living vertebrate.</p></div>
-<div class="card"><strong>Bristlecone Pine</strong><p class="muted">5,000+ years • extreme resilience to harsh conditions.</p></div>
-</div>
-</section>
+    /* Learn section */
+    .tile{border-radius:16px; overflow:hidden; background:rgba(255,255,255,.05); border:1px solid rgba(255,255,255,.08)}
+    .tile .thumb{height:120px;background:linear-gradient(135deg,#5bb3ff22,#fff0), url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 120"><defs><linearGradient id="g" x1="0" x2="1"><stop offset="0" stop-color="%235bb3ff" stop-opacity=".25"/><stop offset="1" stop-color="%23ffffff" stop-opacity="0"/></linearGradient></defs><rect width="200" height="120" fill="url(%23g)"/></svg>') center/cover}
+    .tile .pad{padding:14px}
 
+    /* Track sliders */
+    .kpi{display:grid;grid-template-columns:1fr auto;gap:8px;align-items:center}
+    .kpi small{color:var(--muted)}
+    .row{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px}
+    @media (max-width:900px){.row{grid-template-columns:1fr}}
 
-<!-- TRACK -->
-<section id="track" class="card" style="margin-top:18px">
-<div class="sectionTitle"><h2>Track Your Health</h2><span class="pill">See how habits change your score</span></div>
-<div class="card" style="background:rgba(255,255,255,.03)">
-<div class="kpi">
-<div>
-<div class="muted">Overall Health Score</div>
-<h1 id="overallScore" style="margin:0">67%</h1>
-</div>
-<button class="btn ghost" id="resetSliders">Reset sliders</button>
-</div>
-</div>
-<div class="row" style="margin-top:14px">
-<div class="card">
-<div class="kpi"><strong>Sleep Quality</strong><small>-2 years per +10%</small></div>
-<input type="range" min="0" max="100" value="70" data-weight="1.0" class="metric" />
-</div>
-<div class="card">
-<div class="kpi"><strong>Nutrition</strong><small>-3 years per +10%</small></div>
-<input type="range" min="0" max="100" value="65" data-weight="1.1" class="metric" />
-</div>
-<div class="card">
-<div class="kpi"><strong>Exercise</strong><small>-2.5 years per +10%</small></div>
-<input type="range" min="0" max="100" value="80" data-weight="1.0" class="metric" />
-</div>
+    input[type=range]{width:100%}
+
+    /* Footer */
+    footer{border-top:1px solid rgba(255,255,255,.06);padding:28px 18px;color:var(--muted)}
+    footer .wrap{max-width:1100px;margin:auto}
+
+    .sectionTitle{display:flex;align-items:center;gap:12px;margin:26px 0 12px}
+    .sectionTitle h2{margin:0}
+  </style>
+</head>
+<body>
+  <header>
+    <div class="nav">
+      <div class="brand">Eterna <span>• Longevity</span></div>
+      <nav>
+        <a href="#home">Home</a>
+        <a href="#learn">Learn</a>
+        <a href="#track">Track</a>
+        <a href="#reflect">Reflect</a>
+        <a href="#community">Community</a>
+        <a href="#research">Research</a>
+      </nav>
+      <div class="spacer"></div>
+      <div class="pill" id="todayPill">Today</div>
+    </div>
+  </header>
+
+  <main>
+    <!-- HOME / JOURNAL OF LONGEVITY -->
+    <section id="home" class="card">
+      <div class="hero">
+        <div class="ringWrap">
+          <div class="ring" id="ageRing" style="--pct:60">
+            <div class="label">
+              <div class="big" id="yearsLived">—</div>
+              <small>years lived</small>
+              <div class="muted" id="yearsAhead">— years ahead</div>
+            </div>
+          </div>
+        </div>
+        <div>
+          <h1>Your Journey to Longevity</h1>
+          <p class="muted">Enter your birth date and set a target lifespan. The ring shows what percent of your life you’ve lived and what’s still ahead, based on today’s date. Data stays on your device (localStorage).</p>
+          <div class="grid cols-2" style="margin-top:12px">
+            <div>
+              <label for="dob">Birth date</label>
+              <input type="date" id="dob" />
+            </div>
+            <div>
+              <label for="expectancy">Target lifespan (years)</label>
+              <input type="number" id="expectancy" value="90" min="50" max="130" />
+            </div>
+          </div>
+          <div style="margin-top:12px;display:flex;gap:10px">
+            <button class="btn" id="saveProfile">Save</button>
+            <button class="btn ghost" id="resetProfile">Reset</button>
+          </div>
+
+          <div class="grid cols-2" style="margin-top:18px">
+            <div class="card">
+              <h3>Learn</h3>
+              <p class="muted">Short lessons on aging science, animals that live long, and healthy habits.</p>
+              <a class="btn" href="#learn">Go to Learn</a>
+            </div>
+            <div class="card">
+              <h3>Track</h3>
+              <p class="muted">Adjust your daily habits (sleep, food, exercise, stress) and see the score change.</p>
+              <a class="btn" href="#track">Go to Track</a>
+            </div>
+          </div>
+          <div class="grid cols-2" style="margin-top:16px">
+            <div class="card">
+              <h3>Reflect</h3>
+              <p class="muted">Write about what a long, meaningful life means to you. Save entries privately.</p>
+              <a class="btn" href="#reflect">Go to Reflect</a>
+            </div>
+            <div class="card">
+              <h3>Community</h3>
+              <p class="muted">See prompts and ideas from others thinking about longevity with care.</p>
+              <a class="btn" href="#community">Open Community</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- LEARN -->
+    <section id="learn" class="card" style="margin-top:18px">
+      <div class="sectionTitle"><h2>Learn</h2><span class="pill">Explore longevity science</span></div>
+      <div class="grid cols-3">
+        <div class="tile"><div class="thumb"></div><div class="pad"><strong>The Science of Blue Zones</strong><p class="muted">What places with many 100+ year-olds do differently.</p></div></div>
+        <div class="tile"><div class="thumb"></div><div class="pad"><strong>Cellular Senescence</strong><p class="muted">How “zombie cells” speed up aging — and how to clear them.</p></div></div>
+        <div class="tile"><div class="thumb"></div><div class="pad"><strong>Mediterranean Diet</strong><p class="muted">Simple nutrition patterns linked to longer healthspan.</p></div></div>
+        <div class="tile"><div class="thumb"></div><div class="pad"><strong>Movement Medicine</strong><p class="muted">Why 150 minutes of moderate exercise/week matters.</p></div></div>
+        <div class="tile"><div class="thumb"></div><div class="pad"><strong>Sleep Quality</strong><p class="muted">Sleep’s role in repair, memory, and longevity.</p></div></div>
+        <div class="tile"><div class="thumb"></div><div class="pad"><strong>Social Connection</strong><p class="muted">A powerful (and often ignored) longevity factor.</p></div></div>
+      </div>
+
+      <div class="sectionTitle" style="margin-top:22px"><h2>Latest Research</h2></div>
+      <div class="grid cols-2">
+        <div class="card"><div class="muted">November 2025</div><h3>Cellular Reprogramming Shows Promise for Age Reversal</h3><p class="muted">Scientists reversed aging markers in human cells using careful reprogramming.</p><div class="pill" style="display:inline-block;margin-top:6px">Why this matters: may restore youthful function without raising cancer risk.</div></div>
+        <div class="card"><div class="muted">October 2025</div><h3>Mediterranean Diet Linked to 20% Lower Mortality</h3><p class="muted">Long-term study highlights olive oil, nuts, and fish as helpful staples.</p><div class="pill" style="display:inline-block;margin-top:6px">Why this matters: clear dietary guidance for long healthspan.</div></div>
+        <div class="card"><div class="muted">September 2025</div><h3>NAD+ Precursor Shows Cognitive Benefits</h3><p class="muted">Randomized trial reports improved memory and clarity in adults over 60.</p><div class="pill" style="display:inline-block;margin-top:6px">Why this matters: first human evidence for brain health effect.</div></div>
+        <div class="card"><div class="muted">August 2025</div><h3>Exercise Intensity and Longevity</h3><p class="muted">About 150 minutes/week of moderate activity maximizes lifespan benefits.</p><div class="pill" style="display:inline-block;margin-top:6px">Why this matters: clearer exercise recommendations.</div></div>
+      </div>
+
+      <div class="sectionTitle" style="margin-top:22px"><h2>Nature’s Longevity Champions</h2></div>
+      <div class="grid cols-3">
+        <div class="card"><strong>Naked Mole Rat</strong><p class="muted">30+ years • shows little aging and cancer resistance.</p></div>
+        <div class="card"><strong>Greenland Shark</strong><p class="muted">400+ years • longest-living vertebrate.</p></div>
+        <div class="card"><strong>Bristlecone Pine</strong><p class="muted">5,000+ years • extreme resilience to harsh conditions.</p></div>
+      </div>
+    </section>
+
+    <!-- TRACK -->
+    <section id="track" class="card" style="margin-top:18px">
+      <div class="sectionTitle"><h2>Track Your Health</h2><span class="pill">See how habits change your score</span></div>
+      <div class="card" style="background:rgba(255,255,255,.03)">
+        <div class="kpi">
+          <div>
+            <div class="muted">Overall Health Score</div>
+            <h1 id="overallScore" style="margin:0">67%</h1>
+          </div>
+          <button class="btn ghost" id="resetSliders">Reset sliders</button>
+        </div>
+      </div>
+      <div class="row" style="margin-top:14px">
+        <div class="card">
+          <div class="kpi"><strong>Sleep Quality</strong><small>-2 years per +10%</small></div>
+          <input type="range" min="0" max="100" value="70" data-weight="1.0" class="metric" />
+        </div>
+        <div class="card">
+          <div class="kpi"><strong>Nutrition</strong><small>-3 years per +10%</small></div>
+          <input type="range" min="0" max="100" value="65" data-weight="1.1" class="metric" />
+        </div>
+        <div class="card">
+          <div class="kpi"><strong>Exercise</strong><small>-2.5 years per +10%</small></div>
+          <input type="range" min="0" max="100" value="80" data-weight="1.0" class="metric" />
+        </div>
+      </div>
+      <div class="row" style="margin-top:14px">
+        <div class="card">
+          <div class="kpi"><strong>Stress Management</strong><small>-1.5 years per +10%</small></div>
+          <input type="range" min="0" max="100" value="50" data-weight="0.9" class="metric" />
+        </div>
+        <div class="card">
+          <div class="kpi"><strong>Social Connection</strong><small>-1 year per +10%</small></div>
+          <input type="range" min="0" max="100" value="75" data-weight="0.8" class="metric" />
+        </div>
+        <div class="card">
+          <div class="kpi"><strong>Life Purpose</strong><small>-1 year per +10%</small></div>
+          <input type="range" min="0" max="100" value="60" data-weight="0.8" class="metric" />
+        </div>
+      </div>
+      <p class="muted" style="margin-top:10px">This score is a simple model for learning. It’s not medical advice.</p>
+    </section>
+
+    <!-- REFLECT -->
+    <section id="reflect" class="card" style="margin-top:18px">
+      <div class="sectionTitle"><h2>Reflect</h2><span class="pill">What does a meaningful long life look like?</span></div>
+      <label for="journal">Your thoughts</label>
+      <textarea id="journal" rows="6" placeholder="Write here... Your text is saved locally."></textarea>
+      <div style="margin-top:10px;display:flex;gap:10px">
+        <button class="btn" id="saveJournal">Save Entry</button>
+        <button class="btn ghost" id="clearJournal">Clear</button>
+      </div>
+    </section>
+
+    <!-- COMMUNITY -->
+    <section id="community" class="card" style="margin-top:18px">
+      <div class="sectionTitle"><h2>Community</h2><span class="pill">Connect & discuss</span></div>
+      <div class="grid cols-2">
+        <div class="card">
+          <h3>Weekly Prompt</h3>
+          <p class="muted">Share one small habit that adds quality years to your life. Why does it matter to you?</p>
+        </div>
+        <div class="card">
+          <h3>Ideas Board</h3>
+          <p class="muted">If money and access were no issue, what longevity tech would you try first — and why?</p>
+        </div>
+      </div>
+      <p class="muted" style="margin-top:8px">(Demo only) In a full product, this section would include accounts, replies, and moderation.</p>
+    </section>
+
+    <!-- RESEARCH (secondary list view) -->
+    <section id="research" class="card" style="margin-top:18px">
+      <div class="sectionTitle"><h2>Research Hub</h2><span class="pill">Readable summaries</span></div>
+      <div class="grid cols-2">
+        <div class="card"><h3>NAD+ Precursors and Cognition</h3><p class="muted">Trial in adults 60+ suggests improved memory/clarity.</p></div>
+        <div class="card"><h3>Exercise Minimum Effective Dose</h3><p class="muted">~150 minutes/week appears optimal for most people.</p></div>
+        <div class="card"><h3>Social Connection as a Longevity Lever</h3><p class="muted">Belonging and purpose act like a health multiplier.</p></div>
+        <div class="card"><h3>Partial Cellular Reprogramming</h3><p class="muted">Promising lab results; human safety questions remain.</p></div>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="wrap">
+      <h3 style="margin:0 0 6px">About Eterna</h3>
+      <p>Eterna is a learning and self-reflection project focused on human longevity. Our mission is to make the science of longer, healthier lives easy to understand and emotionally meaningful. We build simple tools that: (1) teach core ideas from credible research, (2) help people notice how everyday choices affect their healthspan, and (3) encourage thoughtful conversations about fairness, ethics, access, and purpose. Eterna does not provide medical advice.</p>
+      <p class="muted">© <span id="yearNow"></span> Eterna. For classroom/demo use.</p>
+    </div>
+  </footer>
+
+  <script>
+    // --- UTILITIES ---
+    const $ = s => document.querySelector(s);
+    const save = (k,v)=>localStorage.setItem(k,JSON.stringify(v));
+    const load = (k,def)=>{try{const v=JSON.parse(localStorage.getItem(k));return v??def}catch{return def}}
+
+    // --- NAV TODAY PILL ---
+    (function(){
+      const d=new Date();
+      const fmt = d.toLocaleDateString(undefined,{weekday:'short', month:'short', day:'numeric'});
+      $('#todayPill').textContent = fmt;
+      $('#yearNow').textContent = new Date().getFullYear();
+    })();
+
+    // --- LONGEVITY JOURNAL (HOME RING) ---
+    const profile = load('eterna_profile',{ dob:"", expectancy: 90 });
+    const dobInput = $('#dob');
+    const expInput = $('#expectancy');
+    dobInput.value = profile.dob || '';
+    expInput.value = profile.expectancy;
+
+    function yearsBetween(a,b){
+      const ms= b - a; return ms / (1000*60*60*24*365.2425);
+    }
+
+    function updateRing(){
+      if(!dobInput.value) { $('#ageRing').style.setProperty('--pct', 0); $('#yearsLived').textContent='—'; $('#yearsAhead').textContent='set birth date'; return; }
+      const dob = new Date(dobInput.value);
+      const today = new Date();
+      const expectancy = Math.max(50, Math.min(130, parseInt(expInput.value||90,10)));
+      const lived = Math.max(0, yearsBetween(dob, today));
+      const pct = Math.max(0, Math.min(100, (lived/expectancy)*100));
+      const ahead = Math.max(0, expectancy - lived);
+      $('#ageRing').style.setProperty('--pct', pct.toFixed(2));
+      $('#yearsLived').textContent = Math.floor(lived).toString();
+      $('#yearsAhead').textContent = `${ahead.toFixed(1)} years ahead`;
+      // save lightweight summary for the journal
+      save('eterna_snapshot',{lived: Math.floor(lived), ahead: ahead.toFixed(1), pct: pct.toFixed(1)});
+    }
+
+    updateRing();
+    ['change','input'].forEach(evt=>{ dobInput.addEventListener(evt,updateRing); expInput.addEventListener(evt,updateRing); });
+
+    $('#saveProfile').addEventListener('click',()=>{
+      save('eterna_profile',{ dob: dobInput.value, expectancy: parseInt(expInput.value,10)||90 });
+      updateRing();
+    });
+    $('#resetProfile').addEventListener('click',()=>{
+      dobInput.value = '';
+      expInput.value = 90;
+      save('eterna_profile',{ dob:'', expectancy:90});
+      updateRing();
+    });
+
+    // --- TRACK SCORE MODEL ---
+    const metrics = Array.from(document.querySelectorAll('.metric'));
+    function updateScore(){
+      // Weighted average mapped to 0-100
+      let wsum=0, vsum=0;
+      metrics.forEach(m=>{ const v=+m.value, w=+m.dataset.weight; vsum += v*w; wsum += w; });
+      const pct = Math.round(vsum/wsum);
+      $('#overallScore').textContent = pct + '%';
+      // small visual feedback by adjusting accent hue
+      const hue = 180 + (pct-50); // 130..230 range
+      document.documentElement.style.setProperty('--accent', `hsl(${hue}, 100%, 66%)`);
+    }
+    metrics.forEach(m=> m.addEventListener('input', updateScore));
+    updateScore();
+
+    $('#resetSliders').addEventListener('click',()=>{
+      [70,65,80,50,75,60].forEach((v,i)=> metrics[i].value=v);
+      updateScore();
+    });
+
+    // --- REFLECT (LOCAL JOURNAL) ---
+    const journal = load('eterna_journal','');
+    $('#journal').value = journal;
+    $('#saveJournal').addEventListener('click',()=>{
+      save('eterna_journal', $('#journal').value);
+      const btn = $('#saveJournal');
+      btn.textContent='Saved'; setTimeout(()=>btn.textContent='Save Entry', 1000);
+    });
+    $('#clearJournal').addEventListener('click',()=>{
+      $('#journal').value=''; save('eterna_journal','');
+    });
+
+    // Smooth anchor scroll
+    document.querySelectorAll('a[href^="#"]').forEach(a=>{
+      a.addEventListener('click', e=>{
+        const id = a.getAttribute('href').slice(1);
+        const el = document.getElementById(id);
+        if(el){ e.preventDefault(); el.scrollIntoView({behavior:'smooth', block:'start'}); }
+      })
+    });
+  </script>
+</body>
+</html>
