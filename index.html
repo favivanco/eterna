@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<p class="muted">Enter your birth date and set a target lifespan. The ring shows what percent of your life you’ve lived and what’s still ahead, based on today’s date. Data stays on your device (localStorage).</p>
+<div class="grid cols-2" style="margin-top:12px">
+<div>
+<label for="dob">Birth date</label>
+<input type="date" id="dob" />
+</div>
+<div>
+<label for="expectancy">Target lifespan (years)</label>
+<input type="number" id="expectancy" value="90" min="50" max="130" />
+</div>
+</div>
+<div style="margin-top:12px;display:flex;gap:10px">
+<button class="btn" id="saveProfile">Save</button>
+<button class="btn ghost" id="resetProfile">Reset</button>
+</div>
+
+
+<div class="grid cols-2" style="margin-top:18px">
+<div class="card">
+<h3>Learn</h3>
+<p class="muted">Short lessons on aging science, animals that live long, and healthy habits.</p>
+<a class="btn" href="#learn">Go to Learn</a>
+</div>
+<div class="card">
+<h3>Track</h3>
+<p class="muted">Adjust your daily habits (sleep, food, exercise, stress) and see the score change.</p>
+<a class="btn" href="#track">Go to Track</a>
+</div>
+</div>
+<div class="grid cols-2" style="margin-top:16px">
+<div class="card">
+<h3>Reflect</h3>
+<p class="muted">Write about what a long, meaningful life means to you. Save entries privately.</p>
+<a class="btn" href="#reflect">Go to Reflect</a>
+</div>
+<div class="card">
+<h3>Community</h3>
+<p class="muted">See prompts and ideas from others thinking about longevity with care.</p>
+<a class="btn" href="#community">Open Community</a>
+</div>
+</div>
+</div>
+</div>
+</section>
+
+
+<!-- LEARN -->
+<section id="learn" class="card" style="margin-top:18px">
+<div class="sectionTitle"><h2>Learn</h2><span class="pill">Explore longevity science</span></div>
+<div class="grid cols-3">
+<div class="tile"><div class="thumb"></div><div class="pad"><strong>The Science of Blue Zones</strong><p class="muted">What places with many 100+ year-olds do differently.</p></div></div>
+<div class="tile"><div class="thumb"></div><div class="pad"><strong>Cellular Senescence</strong><p class="muted">How “zombie cells” speed up aging — and how to clear them.</p></div></div>
+<div class="tile"><div class="thumb"></div><div class="pad"><strong>Mediterranean Diet</strong><p class="muted">Simple nutrition patterns linked to longer healthspan.</p></div></div>
+<div class="tile"><div class="thumb"></div><div class="pad"><strong>Movement Medicine</strong><p class="muted">Why 150 minutes of moderate exercise/week matters.</p></div></div>
+<div class="tile"><div class="thumb"></div><div class="pad"><strong>Sleep Quality</strong><p class="muted">Sleep’s role in repair, memory, and longevity.</p></div></div>
+<div class="tile"><div class="thumb"></div><div class="pad"><strong>Social Connection</strong><p class="muted">A powerful (and often ignored) longevity factor.</p></div></div>
+</div>
+
+
+<div class="sectionTitle" style="margin-top:22px"><h2>Latest Research</h2></div>
+<div class="grid cols-2">
+<div class="card"><div class="muted">November 2025</div><h3>Cellular Reprogramming Shows Promise for Age Reversal</h3><p class="muted">Scientists reversed aging markers in human cells using careful reprogramming.</p><div class="pill" style="display:inline-block;margin-top:6px">Why this matters: may restore youthful function without raising cancer risk.</div></div>
+<div class="card"><div class="muted">October 2025</div><h3>Mediterranean Diet Linked to 20% Lower Mortality</h3><p class="muted">Long-term study highlights olive oil, nuts, and fish as helpful staples.</p><div class="pill" style="display:inline-block;margin-top:6px">Why this matters: clear dietary guidance for long healthspan.</div></div>
+<div class="card"><div class="muted">September 2025</div><h3>NAD+ Precursor Shows Cognitive Benefits</h3><p class="muted">Randomized trial reports improved memory and clarity in adults over 60.</p><div class="pill" style="display:inline-block;margin-top:6px">Why this matters: first human evidence for brain health effect.</div></div>
+<div class="card"><div class="muted">August 2025</div><h3>Exercise Intensity and Longevity</h3><p class="muted">About 150 minutes/week of moderate activity maximizes lifespan benefits.</p><div class="pill" style="display:inline-block;margin-top:6px">Why this matters: clearer exercise recommendations.</div></div>
+</div>
+
+
+<div class="sectionTitle" style="margin-top:22px"><h2>Nature’s Longevity Champions</h2></div>
+<div class="grid cols-3">
+<div class="card"><strong>Naked Mole Rat</strong><p class="muted">30+ years • shows little aging and cancer resistance.</p></div>
+<div class="card"><strong>Greenland Shark</strong><p class="muted">400+ years • longest-living vertebrate.</p></div>
+<div class="card"><strong>Bristlecone Pine</strong><p class="muted">5,000+ years • extreme resilience to harsh conditions.</p></div>
+</div>
+</section>
+
+
+<!-- TRACK -->
+<section id="track" class="card" style="margin-top:18px">
+<div class="sectionTitle"><h2>Track Your Health</h2><span class="pill">See how habits change your score</span></div>
+<div class="card" style="background:rgba(255,255,255,.03)">
+<div class="kpi">
+<div>
+<div class="muted">Overall Health Score</div>
+<h1 id="overallScore" style="margin:0">67%</h1>
+</div>
+<button class="btn ghost" id="resetSliders">Reset sliders</button>
+</div>
+</div>
+<div class="row" style="margin-top:14px">
+<div class="card">
+<div class="kpi"><strong>Sleep Quality</strong><small>-2 years per +10%</small></div>
+<input type="range" min="0" max="100" value="70" data-weight="1.0" class="metric" />
+</div>
+<div class="card">
+<div class="kpi"><strong>Nutrition</strong><small>-3 years per +10%</small></div>
+<input type="range" min="0" max="100" value="65" data-weight="1.1" class="metric" />
+</div>
+<div class="card">
+<div class="kpi"><strong>Exercise</strong><small>-2.5 years per +10%</small></div>
+<input type="range" min="0" max="100" value="80" data-weight="1.0" class="metric" />
+</div>
